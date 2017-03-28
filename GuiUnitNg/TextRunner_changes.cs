@@ -65,7 +65,7 @@ namespace GuiUnitNg
 			}
 		}
 
-		static void Shutdown ()
+		internal static void Shutdown ()
 		{
 			// Run the shutdown method on the main thread
 			var helper = new InvokerHelper {

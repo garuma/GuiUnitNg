@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GuiUnitNg", "GuiUnitNg\GuiUnitNg.csproj", "{8BA1DC69-91D7-464F-93D0-9D6D667B59AC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GuiUnitDriver", "GuiUnitDriver\GuiUnitDriver.csproj", "{5FD6E5AA-5990-4A52-BC13-2502FDCC6517}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -13,5 +15,9 @@ Global
 		{8BA1DC69-91D7-464F-93D0-9D6D667B59AC}.Debug|x86.Build.0 = Debug|x86
 		{8BA1DC69-91D7-464F-93D0-9D6D667B59AC}.Release|x86.ActiveCfg = Release|x86
 		{8BA1DC69-91D7-464F-93D0-9D6D667B59AC}.Release|x86.Build.0 = Release|x86
+		{5FD6E5AA-5990-4A52-BC13-2502FDCC6517}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5FD6E5AA-5990-4A52-BC13-2502FDCC6517}.Debug|x86.Build.0 = Debug|Any CPU
+		{5FD6E5AA-5990-4A52-BC13-2502FDCC6517}.Release|x86.ActiveCfg = Release|Any CPU
+		{5FD6E5AA-5990-4A52-BC13-2502FDCC6517}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

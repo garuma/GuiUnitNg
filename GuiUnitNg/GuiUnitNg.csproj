@@ -52,6 +52,7 @@
     <Compile Include="GuiUnit\XmlTestListener.cs" />
     <Compile Include="GuiUnit\TcpWriter.cs" />
     <Compile Include="Reflect.cs" />
+    <Compile Include="GuiRunTestsAction.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
