@@ -66,6 +66,6 @@
       <InputAssemblies Include="$(OutputPath)\nunit.framework.dll" />
     </ItemGroup>
 
-    <ILRepack Parallel="false" Internalize="false" Union="true" InputAssemblies="@(InputAssemblies)" TargetKind="Exe" OutputFile="$(OutputPath)\GuiUnit.exe" />
+    <ILRepack Parallel="false" Internalize="false" Union="true" InputAssemblies="@(InputAssemblies)" TargetKind="Exe" OutputFile="$(OutputPath)\GuiUnit.exe" KeyFile="guiunit.snk" />
   </Target>
 </Project>
