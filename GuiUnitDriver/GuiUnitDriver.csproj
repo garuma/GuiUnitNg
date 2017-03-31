@@ -36,12 +36,17 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GuiUnitDriverFactory.cs" />
-    <Compile Include="GuiUnitDriver.cs" />
     <Compile Include="CallbackHandler.cs" />
     <Compile Include="RunTestsCallbackHandler.cs" />
+    <Compile Include="GuiUnitDriver.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="GuiUnitDriver.addins">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -37,15 +37,15 @@ namespace GuiUnitDriver
 	/// </summary>
 	public class GuiUnitDriver : IFrameworkDriver
 	{
-		private const string GuiUnit = "GuiUnit";
-		private const string LOAD_MESSAGE = "Method called without calling Load first";
+		const string GuiUnit = "GuiUnit";
+		const string LOAD_MESSAGE = "Method called without calling Load first";
 
-		private static readonly string CONTROLLER_TYPE = "NUnit.Framework.Api.FrameworkController";
-		private static readonly string LOAD_ACTION = CONTROLLER_TYPE + "+LoadTestsAction";
-		private static readonly string EXPLORE_ACTION = CONTROLLER_TYPE + "+ExploreTestsAction";
-		private static readonly string COUNT_ACTION = CONTROLLER_TYPE + "+CountTestsAction";
-		private static readonly string RUN_ACTION = "GuiUnitNg.GuiRunTestsAction";
-		private static readonly string STOP_RUN_ACTION = CONTROLLER_TYPE + "+StopRunAction";
+		static readonly string CONTROLLER_TYPE = "NUnit.Framework.Api.FrameworkController";
+		static readonly string LOAD_ACTION = CONTROLLER_TYPE + "+LoadTestsAction";
+		static readonly string EXPLORE_ACTION = CONTROLLER_TYPE + "+ExploreTestsAction";
+		static readonly string COUNT_ACTION = CONTROLLER_TYPE + "+CountTestsAction";
+		static readonly string RUN_ACTION = "GuiUnitNg.GuiRunTestsAction";
+		static readonly string STOP_RUN_ACTION = CONTROLLER_TYPE + "+StopRunAction";
 
 		AppDomain _testDomain;
 		string _testAssemblyPath;
@@ -69,9 +69,8 @@ namespace GuiUnitDriver
 		/// <returns>An Xml string representing the loaded test</returns>
 		public string Load (string testAssemblyPath, IDictionary<string, object> settings)
 		{
-			settings ["InternalTraceLevel"] = "Debug";
-			GuiUnitDriverFactory.Log (string.Format ("Driver > Load {0} with settings {1}", testAssemblyPath,
-			                                         string.Join (", ", settings.Select (s => s.ToString ()))));
+			// Uncomment this to get trace output from NUnit itself
+			//settings ["InternalTraceLevel"] = "Debug";
 			var idPrefix = string.IsNullOrEmpty (ID) ? "" : ID + "-";
 			_testAssemblyPath = testAssemblyPath;
 			try {
@@ -80,22 +79,17 @@ namespace GuiUnitDriver
 				throw new NUnitEngineException ("The NUnit 3.0 driver cannot support this test assembly. Use a platform specific runner.", ex);
 			}
 
-			GuiUnitDriverFactory.Log ("Driver > Load ControllerLoaded");
-
 			CallbackHandler handler = new CallbackHandler ();
 
 			var fileName = Path.GetFileName (_testAssemblyPath);
 
 			CreateObject (LOAD_ACTION, _frameworkController, handler);
 
-			GuiUnitDriverFactory.Log ("Driver > Load CallbackReceived " + handler.Result);
-
 			return handler.Result;
 		}
 
 		public int CountTestCases (string filter)
 		{
-			GuiUnitDriverFactory.Log (string.Format ("Driver > CountTestCases {0}", filter));
 			CheckLoadWasCalled ();
 
 			CallbackHandler handler = new CallbackHandler ();
