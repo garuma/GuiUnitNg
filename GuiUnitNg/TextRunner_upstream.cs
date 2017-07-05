@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2015 Charlie Poole
+// Copyright (c) 2015 Charlie Poole, Rob Prouse
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -74,7 +74,6 @@ namespace GuiUnitNg
         #endregion
 
         private Assembly _testAssembly;
-        private readonly List<Assembly> _assemblies = new List<Assembly>();
         private ITestAssemblyRunner _runner;
 
         private NUnitLiteOptions _options;
@@ -84,9 +83,11 @@ namespace GuiUnitNg
 
         #region Constructors
 
-        //// <summary>
-        //// Initializes a new instance of the <see cref="TextRunner"/> class.
-        //// </summary>
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TextRunner"/> class
+        /// without specifying an assembly. This is interpreted as allowing
+        /// a single input file in the argument list to Execute().
+        /// </summary>
         public TextRunner() { }
 
         /// <summary>
@@ -110,16 +111,15 @@ namespace GuiUnitNg
 
         #region Public Methods
 
-#if !PORTABLE
         public int Execute(string[] args)
         {
-            _options = new NUnitLiteOptions(args);
+            _options = new NUnitLiteOptions(_testAssembly == null, args);
 
             ExtendedTextWriter outWriter = null;
             if (_options.OutFile != null)
             {
                 var outFile = Path.Combine(_options.WorkDirectory, _options.OutFile);
-#if NETSTANDARD1_6
+#if NETSTANDARD1_3 || NETSTANDARD1_6
                 var textWriter = File.CreateText(outFile);
 #else
                 var textWriter = TextWriter.Synchronized(new StreamWriter(outFile));
@@ -136,7 +136,7 @@ namespace GuiUnitNg
             if (_options.ErrFile != null)
             {
                 var errFile = Path.Combine(_options.WorkDirectory, _options.ErrFile);
-#if NETSTANDARD1_6
+#if NETSTANDARD1_3 || NETSTANDARD1_6
                 errWriter = File.CreateText(errFile);
 #else
                 errWriter = TextWriter.Synchronized(new StreamWriter(errFile));
@@ -152,27 +152,27 @@ namespace GuiUnitNg
             finally
             {
                 if (_options.OutFile != null && outWriter != null)
-#if NETSTANDARD1_6
+#if NETSTANDARD1_3 || NETSTANDARD1_6
                     outWriter.Dispose();
 #else
                     outWriter.Close();
 #endif
 
                 if (_options.ErrFile != null && errWriter != null)
-#if NETSTANDARD1_6
+#if NETSTANDARD1_3 || NETSTANDARD1_6
                     errWriter.Dispose();
 #else
                     errWriter.Close();
 #endif
             }
         }
-#endif
 
-        // Entry point called by AutoRun and by the portable nunitlite.runner
-        public int Execute(ExtendedTextWriter writer, TextReader reader, NUnitLiteOptions options)
+        // Entry point called by AutoRun and by the .NET Standard nunitlite.runner
+        public int Execute(ExtendedTextWriter writer, TextReader reader, string[] args)
         {
-            _textUI = new TextUI(writer, reader, options);
-            _options = options;
+            _options = new NUnitLiteOptions(_testAssembly == null, args);
+
+            _textUI = new TextUI(writer, reader, _options);
 
             return Execute();
         }
@@ -182,16 +182,12 @@ namespace GuiUnitNg
         {
             _runner = new NUnitTestAssemblyRunner(new DefaultTestAssemblyBuilder());
 
-#if !PORTABLE
             InitializeInternalTrace();
-#endif
 
             try
             {
-#if !PORTABLE
                 if (!Directory.Exists(_options.WorkDirectory))
                     Directory.CreateDirectory(_options.WorkDirectory);
-#endif
 
                 if (_options.TeamCity)
                     _teamCity = new TeamCityEventListener(_textUI.Writer);
@@ -212,37 +208,33 @@ namespace GuiUnitNg
                 if (_options.ErrorMessages.Count > 0)
                 {
                     _textUI.DisplayErrors(_options.ErrorMessages);
+                    _textUI.Writer.WriteLine();
                     _textUI.DisplayHelp();
 
                     return TextRunner.INVALID_ARG;
+                }
+
+                if (_testAssembly == null && _options.InputFile == null)
+                {
+                    _textUI.DisplayError("No test assembly was specified.");
+                    _textUI.Writer.WriteLine();
+                    _textUI.DisplayHelp();
+
+                    return TextRunner.OK;
                 }
 
                 _textUI.DisplayRuntimeEnvironment();
 
                 var testFile = _testAssembly != null
                     ? AssemblyHelper.GetAssemblyPath(_testAssembly)
-                    : _options.InputFiles.Count > 0
-                        ? _options.InputFiles[0]
-                        : null;
+                    : _options.InputFile;
 
-                if (testFile != null)
-                {
-                    _textUI.DisplayTestFiles(new string[] { testFile });
-                    if (_testAssembly == null)
-                        _testAssembly = AssemblyHelper.Load(testFile);
-                }
-                else
-                {
-                    _textUI.DisplayHelp();
-                    return TextRunner.OK;
-                }
-
+                _textUI.DisplayTestFiles(new string[] { testFile });
+                if (_testAssembly == null)
+                    _testAssembly = AssemblyHelper.Load(testFile);
 
                 if (_options.WaitBeforeExit && _options.OutFile != null)
                     _textUI.DisplayWarning("Ignoring /wait option - only valid for Console");
-
-                foreach (string nameOrPath in _options.InputFiles)
-                    _assemblies.Add(AssemblyHelper.Load(nameOrPath));
 
                 var runSettings = MakeRunSettings(_options);
 
@@ -253,7 +245,7 @@ namespace GuiUnitNg
                 TestFilter filter = CreateTestFilter(_options);
 
                 _runner.Load(_testAssembly, runSettings);
-                return _options.Explore ? ExploreTests() : RunTestsWrapper(filter, runSettings);
+                return _options.Explore ? ExploreTests(filter) : RunTestsWrapper(filter, runSettings);
             }
             catch (FileNotFoundException ex)
             {
@@ -284,7 +276,6 @@ namespace GuiUnitNg
 
             ReportResults(result);
 
-#if !PORTABLE
             if (_options.ResultOutputSpecifications.Count > 0)
             {
                 var outputManager = new OutputManager(_options.WorkDirectory);
@@ -292,7 +283,6 @@ namespace GuiUnitNg
                 foreach (var spec in _options.ResultOutputSpecifications)
                     outputManager.WriteResultFile(result, spec, runSettings, filter);
             }
-#endif
             if (Summary.InvalidTestFixtures > 0)
                 return INVALID_TEST_FIXTURE;
 
@@ -319,10 +309,9 @@ namespace GuiUnitNg
             _textUI.DisplaySummaryReport(Summary);
         }
 
-        private int ExploreTests()
+        private int ExploreTests(ITestFilter filter)
         {
-#if !PORTABLE
-            ITest testNode = _runner.LoadedTest;
+            ITest testNode = _runner.ExploreTests(filter);
 
             var specs = _options.ExploreOutputSpecifications;
 
@@ -335,7 +324,6 @@ namespace GuiUnitNg
                 foreach (var spec in _options.ExploreOutputSpecifications)
                     outputManager.WriteTestFile(testNode, spec);
             }
-#endif
 
             return OK;
         }
@@ -357,10 +345,9 @@ namespace GuiUnitNg
             if (options.RandomSeed >= 0)
                 runSettings[FrameworkPackageSettings.RandomSeed] = options.RandomSeed;
 
-#if !PORTABLE
             if (options.WorkDirectory != null)
                 runSettings[FrameworkPackageSettings.WorkDirectory] = Path.GetFullPath(options.WorkDirectory);
-#endif
+
             if (options.DefaultTimeout >= 0)
                 runSettings[FrameworkPackageSettings.DefaultTimeout] = options.DefaultTimeout;
 
@@ -409,7 +396,6 @@ namespace GuiUnitNg
             return filter;
         }
 
-#if !PORTABLE
         private void InitializeInternalTrace()
         {
             var traceLevel = (InternalTraceLevel)Enum.Parse(typeof(InternalTraceLevel), _options.InternalTraceLevel ?? "Off", true);
@@ -438,19 +424,18 @@ namespace GuiUnitNg
             const string ext = "log";
             var baseName = _testAssembly != null
                 ? _testAssembly.GetName().Name
-                : _options.InputFiles.Count > 0
-                    ? Path.GetFileNameWithoutExtension(_options.InputFiles[0])
+                : _options.InputFile != null
+                    ? Path.GetFileNameWithoutExtension(_options.InputFile)
                     : "NUnitLite";
 
-#if NETSTANDARD1_6
-            var id = DateTime.Now.ToString("o");
+#if NETSTANDARD1_3 || NETSTANDARD1_6
+            var id = DateTime.Now.ToString("yyyy-dd-M--HH-mm-ss");
 #else
             var id = Process.GetCurrentProcess().Id;
 #endif
 
             return string.Format(LOG_FILE_FORMAT, id, baseName, ext);
         }
-#endif
 
         #endregion
 
@@ -464,7 +449,7 @@ namespace GuiUnitNg
         {
             if (_teamCity != null)
                 _teamCity.TestStarted(test);
-			OtherTestStarted (test);
+			OtherTestStarted(test);
         }
 
         /// <summary>
@@ -477,7 +462,7 @@ namespace GuiUnitNg
                 _teamCity.TestFinished(result);
 
             _textUI.TestFinished(result);
-			OtherTestFinished (result);
+			OtherTestFinished(result);
         }
 
         /// <summary>
@@ -487,7 +472,7 @@ namespace GuiUnitNg
         public void TestOutput(TestOutput output)
         {
             _textUI.TestOutput(output);
-			OtherTestOutput (output);
+			OtherTestOutput(output);
         }
 
         #endregion

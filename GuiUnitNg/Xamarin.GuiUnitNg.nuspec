@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
 	<id>Xamarin.GuiUnitNg</id>
-	<version>3.6.1.1</version>
+	<version>3.7.1.1</version>
 	<projectUrl>https://github.com/garuma/GuiUnitNg</projectUrl>
 	<description>A more up-to-date version of https://github.com/mono/guiunit</description>
 	<summary>This is a small project to compile both a runner and NUnit framework (both based on latest NUnit NuGet package) into a single .exe assembly that can be linked into a test project and used directly to run it.
