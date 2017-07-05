@@ -16,7 +16,7 @@ namespace NUnit.Framework.Internal
 					Console.WriteLine ("Trying to call {0} without an instance", method.Name);
 				try {
 					object result = null;
-					if (GuiUnitNg.TextRunner.MainLoop == null) {
+					if (GuiUnitNg.TextRunner.MainLoop == null || TestExecutionContext.CurrentContext.ParallelScope != ((ParallelScope)0)) {
 						result = method.Invoke (fixture, args);
 					} else {
 						var invokeHelper = new GuiUnit.InvokerHelper {
