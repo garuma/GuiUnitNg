@@ -47,17 +47,17 @@ namespace GuiUnitNg
 		public int RunTestsWrapper (TestFilter filter, IDictionary<string, object> runSettings)
 		{
 			if (MainLoop == null) {
-				return RunTests (filter, runSettings);
+				return Math.Min (255, RunTests (filter, runSettings));
 			} else {
 				MainLoop.InitializeToolkit ();
 				int result = UNEXPECTED_ERROR;
 				System.Threading.ThreadPool.QueueUserWorkItem (d => {
 					try {
-						result = RunTests (filter, runSettings);
+						result = Math.Min (255, RunTests (filter, runSettings));
 					} catch (Exception ex) {
 						Console.WriteLine ("Unexpected error while running the tests: {0}", ex);
 					} finally {
-						Shutdown ();
+						Shutdown (result);
 					}
 				});
 				MainLoop.RunMainLoop ();
@@ -65,11 +65,11 @@ namespace GuiUnitNg
 			}
 		}
 
-		internal static void Shutdown ()
+		internal static void Shutdown (int exitCode)
 		{
 			// Run the shutdown method on the main thread
 			var helper = new InvokerHelper {
-				Func = () => { MainLoop.Shutdown (); return null; }
+				Func = () => { MainLoop.Shutdown (exitCode); return null; }
 			};
 			MainLoop.InvokeOnMainLoop (helper);
 		}

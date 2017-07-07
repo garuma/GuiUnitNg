@@ -7,6 +7,9 @@ namespace GuiUnit
 {
 	public class MonoMacMainLoopIntegration : IMainLoopIntegration
 	{
+		[DllImport ("libc")]
+		static extern void _exit (int exitCode);
+
 		Type Application {
 			get; set;
 		}
@@ -55,9 +58,14 @@ namespace GuiUnit
 			Application.GetMethod ("Run").Invoke (SharedApplication, null);
 		}
 
-		public void Shutdown ()
+		public void Shutdown (int exitCode)
 		{
-			Application.GetMethod ("Terminate").Invoke (SharedApplication, new [] { SharedApplication });
+			// Application.Terminate does not set the exit code to failure when tests have failed.
+			// We must exit immediately for appkit applications to ensure appkit's threads
+			// do not keep us alive forever.
+
+			_exit (exitCode);
+			//Application.GetMethod ("Terminate").Invoke (SharedApplication, new [] { SharedApplication });
 		}
 
 		[DllImport ("/usr/lib/libSystem.dylib")]
