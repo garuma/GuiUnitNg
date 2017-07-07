@@ -69,8 +69,10 @@ namespace GuiUnit
 			Application.GetMethod ("Run").Invoke (null, null);
 		}
 
-		public void Shutdown ()
+		public void Shutdown (int exitCode)
 		{
+			// This causes the main loop to exit. The right exit code will be
+			// returned when the Main method returns.
 			Application.GetMethod ("Exit").Invoke (null, null);
 		}
 	}

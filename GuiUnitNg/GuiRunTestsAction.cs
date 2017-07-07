@@ -17,7 +17,7 @@ namespace GuiUnitNg
 					} catch (Exception ex) {
 						Console.WriteLine ("Unexpected error while running the tests: {0}", ex);
 					} finally {
-						TextRunner.Shutdown ();
+						TextRunner.Shutdown (1);
 					}
 				});
 				TextRunner.MainLoop.RunMainLoop ();
