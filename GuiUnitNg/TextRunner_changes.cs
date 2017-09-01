@@ -76,12 +76,30 @@ namespace GuiUnitNg
 
 		public void OtherTestStarted (ITest test)
 		{
+			switch (test) {
+			case TestMethod testMethod:
+				GuiUnitNg.GuiUnitEventSource.Log.TestMethodStart (testMethod.FullName);
+				break;
+			case TestSuite testSuite:
+				GuiUnitNg.GuiUnitEventSource.Log.TestSuiteStart (testSuite.FullName);
+				break;
+			}
+
 			foreach (var l in extraListeners)
 				l.TestStarted (test);
 		}
 
 		public void OtherTestFinished (ITestResult result)
 		{
+			switch (result.Test) {
+			case TestMethod testMethod:
+				GuiUnitNg.GuiUnitEventSource.Log.TestMethodStop ();
+				break;
+			case TestSuite testSuite:
+				GuiUnitNg.GuiUnitEventSource.Log.TestSuiteStop ();
+				break;
+			}
+
 			foreach (var l in extraListeners)
 				l.TestFinished (result);
 		}

@@ -14,7 +14,11 @@ namespace NUnit.Framework.Internal
 			if (method != null) {
 				if (fixture == null && !method.IsStatic)
 					Console.WriteLine ("Trying to call {0} without an instance", method.Name);
+
 				try {
+					GuiUnitNg.GuiUnitEventSource.Log.InnerInvokeStart (TestExecutionContext.CurrentContext.CurrentTest.FullName,
+					                                                   method.Name,
+					                                                   fixture?.GetType ()?.Name ?? "no fixture");
 					object result = null;
 					if (GuiUnitNg.TextRunner.MainLoop == null || TestExecutionContext.CurrentContext.ParallelScope != ((ParallelScope)0)) {
 						result = method.Invoke (fixture, args);
@@ -34,6 +38,8 @@ namespace NUnit.Framework.Internal
 					return result;
 				} catch (Exception e) {
 					Rethrow (e);
+				} finally {
+					GuiUnitNg.GuiUnitEventSource.Log.InnerInvokeStop ();
 				}
 			}
 

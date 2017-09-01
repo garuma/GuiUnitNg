@@ -14,7 +14,12 @@ namespace GuiUnitNg
 			var runner = new GuiUnitNg.TextRunner ();
 			if (tcpListener != null)
 				runner.AddExtraListener (tcpListener);
-			return runner.Execute (args);
+			try {
+				GuiUnitEventSource.Log.TestRunnerStart ();
+				return runner.Execute (args);
+			} finally {
+				GuiUnitEventSource.Log.TestRunnerStop ();
+			}
 		}
 
 		/* The below methods allow the runner to be used out of the box with Xamarin Studio
