@@ -8,6 +8,17 @@
     <AssemblyName>GuiUnitNg</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <Prefer32Bit>false</Prefer32Bit>
+    <InferPackageContents>false</InferPackageContents>
+    <PackageId>Xamarin.GuiUnitNg</PackageId>
+    <PackageVersion>3.7.1.2</PackageVersion>
+    <Authors>garuma</Authors>
+    <PackageProjectUrl>https://github.com/garuma/GuiUnitNg</PackageProjectUrl>
+    <Summary>This is a small project to compile both a runner and NUnit framework (both based on latest NUnit NuGet package) into a single .exe assembly that can be linked into a test project and used directly to run it.
+
+Like the original GuiUnit, the goal of the runner is to provide integration with a GUI runloop (Gtk, Cocoa, Xwt, ...) so that unit tests that depend on it (for proper async/await operations for instance) can be run correctly.
+
+The verion of this package follows the version of the NUnit dependency it derives from</Summary>
+    <Description>A more up-to-date version of https://github.com/mono/guiunit</Description>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,12 +41,16 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.3.7.1\lib\net45\nunit.framework.dll</HintPath>
-    </Reference>
-    <Reference Include="nunitlite">
-      <HintPath>..\packages\NUnitLite.3.7.2\lib\net45\nunitlite.dll</HintPath>
-    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="NUnit" Version="3.7.1">
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="NUnitLite" Version="3.7.2">
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="NuGet.Build.Packaging" Version="0.2.0" />
+    <PackageReference Include="ILRepack" Version="2.0.13" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -52,20 +67,35 @@
     <Compile Include="GuiUnit\TcpWriter.cs" />
     <Compile Include="Reflect.cs" />
     <Compile Include="GuiRunTestsAction.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-    <None Include="Xamarin.GuiUnitNg.nuspec" />
+    <Compile Include="GuiUnitEventSource.cs" />
+    <Compile Include="AsyncInvocationRegion.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\packages\ILRepack.MSBuild.Task.1.0.9\build\ILRepack.MSBuild.Task.targets" Condition="Exists('..\packages\ILRepack.MSBuild.Task.1.0.9\build\ILRepack.MSBuild.Task.targets')" />
-  <Target Name="AfterBuild" Condition="'$(Configuration)' == 'Release'">
-    <ItemGroup>
-      <InputAssemblies Include="$(OutputPath)\$(AssemblyName).exe" />
-      <InputAssemblies Include="$(OutputPath)\nunitlite.dll" />
-      <InputAssemblies Include="$(OutputPath)\nunit.framework.dll" />
-    </ItemGroup>
 
-    <ILRepack Parallel="false" Internalize="false" Union="true" InputAssemblies="@(InputAssemblies)" TargetKind="Exe" OutputFile="$(OutputPath)\GuiUnit.exe" KeyFile="guiunit.snk" />
+  <Target Name="_GatherInputAssemblies" Returns="@(InputAssembly)">
+    <ItemGroup>
+      <InputAssembly Include="$(OutputPath)$(AssemblyName).exe" />
+      <InputAssembly Include="$(OutputPath)nunitlite.dll" />
+      <InputAssembly Include="$(OutputPath)nunit.framework.dll" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="ILRepack" Condition="'$(Configuration)' == 'Release'" DependsOnTargets="_GatherInputAssemblies" Inputs="@(InputAssembly)" Outputs="$(OutputPath)GuiUnit.exe">
+    <PropertyGroup>
+      <Mono>mono</Mono>
+      <Mono Condition="$([MSBuild]::IsOSPlatform('Windows'))"></Mono>
+    </PropertyGroup>
+
+    <Exec Command="$(Mono) $(ILRepack) /keyfile:guiunit.snk /target:exe /allowdup:&quot;NUnit.Framework.Internal.*&quot; /union /out:&quot;$(OutputPath)GuiUnit.exe&quot; @(InputAssembly, ' ')"/>
+  </Target>
+
+  <Target Name="AfterBuild" DependsOnTargets="ILRepack" />
+
+  <Target Name="_GatherPackageFiles" DependsOnTargets="ILRepack" BeforeTargets="GetPackageContents">
+    <ItemGroup>
+      <PackageFile Include="$(OutputPath)GuiUnit.exe">
+        <Kind>Lib</Kind>
+      </PackageFile>
+    </ItemGroup>
   </Target>
 </Project>
