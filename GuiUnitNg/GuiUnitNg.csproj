@@ -10,7 +10,7 @@
     <Prefer32Bit>false</Prefer32Bit>
     <InferPackageContents>false</InferPackageContents>
     <PackageId>Xamarin.GuiUnitNg</PackageId>
-    <PackageVersion>3.7.1.2</PackageVersion>
+    <PackageVersion>3.8.1.1</PackageVersion>
     <Authors>garuma</Authors>
     <PackageProjectUrl>https://github.com/garuma/GuiUnitNg</PackageProjectUrl>
     <Summary>This is a small project to compile both a runner and NUnit framework (both based on latest NUnit NuGet package) into a single .exe assembly that can be linked into a test project and used directly to run it.
@@ -43,10 +43,10 @@ The verion of this package follows the version of the NUnit dependency it derive
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="NUnit" Version="3.7.1">
+    <PackageReference Include="NUnit" Version="3.8.1">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="NUnitLite" Version="3.7.2">
+    <PackageReference Include="NUnitLite" Version="3.8.1">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="NuGet.Build.Packaging" Version="0.2.0" />
