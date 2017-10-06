@@ -28,10 +28,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="nunit.engine.api">
-      <HintPath>..\packages\NUnit.Engine.Api.3.6.1\lib\nunit.engine.api.dll</HintPath>
-    </Reference>
     <Reference Include="System.Web" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="NUnit.Engine.Api" Version="3.7.0" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -39,9 +39,6 @@
     <Compile Include="CallbackHandler.cs" />
     <Compile Include="RunTestsCallbackHandler.cs" />
     <Compile Include="GuiUnitDriver.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="GuiUnitDriver.addins">
