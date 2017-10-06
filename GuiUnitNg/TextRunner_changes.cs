@@ -21,6 +21,9 @@ namespace GuiUnitNg
 		static IMainLoopIntegration mainLoop;
 		List<ITestListener> extraListeners = new List<ITestListener> ();
 
+		internal bool WantsOverallTestCount { get; set; }
+		internal int OverallTestCount { get; set; }
+
 		public void AddExtraListener (ITestListener listener)
 		{
 			if (listener == null)

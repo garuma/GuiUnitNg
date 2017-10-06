@@ -68,6 +68,7 @@ The verion of this package follows the version of the NUnit dependency it derive
     <Compile Include="Reflect.cs" />
     <Compile Include="GuiRunTestsAction.cs" />
     <Compile Include="GuiUnitEventSource.cs" />
+    <Compile Include="GuiUnit\VstsPercentageTestListener.cs" />
     <Compile Include="AsyncInvocationRegion.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
@@ -86,7 +87,7 @@ The verion of this package follows the version of the NUnit dependency it derive
       <Mono Condition="$([MSBuild]::IsOSPlatform('Windows'))"></Mono>
     </PropertyGroup>
 
-    <Exec Command="$(Mono) $(ILRepack) /keyfile:guiunit.snk /target:exe /allowdup:&quot;NUnit.Framework.Internal.*&quot; /union /out:&quot;$(OutputPath)GuiUnit.exe&quot; @(InputAssembly, ' ')"/>
+    <Exec Command="$(Mono) $(ILRepack) /keyfile:guiunit.snk /target:exe /allowdup:&quot;NUnit.Framework.Internal.*&quot; /union /out:&quot;$(OutputPath)GuiUnit.exe&quot; @(InputAssembly, ' ')" />
   </Target>
 
   <Target Name="AfterBuild" DependsOnTargets="ILRepack" />

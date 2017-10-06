@@ -245,6 +245,10 @@ namespace GuiUnitNg
                 TestFilter filter = CreateTestFilter(_options);
 
                 _runner.Load(_testAssembly, runSettings);
+
+                if (WantsOverallTestCount)
+                    OverallTestCount = _runner.CountTestCases (filter);
+
                 return _options.Explore ? ExploreTests(filter) : RunTestsWrapper(filter, runSettings);
             }
             catch (FileNotFoundException ex)
