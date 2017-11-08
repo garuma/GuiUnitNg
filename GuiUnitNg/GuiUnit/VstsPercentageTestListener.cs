@@ -21,6 +21,8 @@ namespace GuiUnit
 
 		public void TestFinished (ITestResult result)
 		{
+			if (result.Test.IsSuite)
+				return;
 			var currentTestFinished = Interlocked.Increment (ref testFinished);
 			rawConsole.WriteLine ("##vso[task.setprogress value={0};]Test {1} finished",
 			                      CurrentPercentage (currentTestFinished).ToString (),
