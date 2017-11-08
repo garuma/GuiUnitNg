@@ -453,6 +453,7 @@ namespace GuiUnitNg
         {
             if (_teamCity != null)
                 _teamCity.TestStarted(test);
+			_textUI.TestStarted (test);
 			OtherTestStarted(test);
         }
 
