@@ -380,10 +380,10 @@ namespace GuiUnitNg
             {
                 var testFilters = new List<TestFilter>();
                 foreach (var test in options.TestList)
-                    testFilters.Add(new FullNameFilter(test));
+                    testFilters.Add(FilterFactory.CreateFullNameFilter(test));
 
                 filter = testFilters.Count > 1
-                    ? new OrFilter(testFilters.ToArray())
+                    ? FilterFactory.CreateOrFilter(testFilters.ToArray())
                     : testFilters[0];
             }
 
@@ -394,7 +394,7 @@ namespace GuiUnitNg
                 var whereFilter = TestFilter.FromXml(TNode.FromXml(xmlText));
                 filter = filter.IsEmpty
                     ? whereFilter
-                    : new AndFilter(filter, whereFilter);
+                    : FilterFactory.CreateAndFilter(filter, whereFilter);
             }
 
             return filter;
