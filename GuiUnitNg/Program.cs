@@ -63,7 +63,7 @@ namespace GuiUnitNg
 		static ITestListener MaybeCreatePercentageListener (string[] args, GuiUnitNg.TextRunner runner, TextWriter rawConsole)
 		{
 			if (args.Any (a => string.Equals (a, "-vsts", StringComparison.OrdinalIgnoreCase))
-			    || !string.IsNullOrEmpty (Environment.GetEnvironmentVariable ("AGENT_ID"))) {
+			    || !string.IsNullOrEmpty (Environment.GetEnvironmentVariable ("AGENT_NAME"))) {
 				runner.WantsOverallTestCount = true;
 				return new VstsPercentageTestListener (runner, rawConsole);
 			}
