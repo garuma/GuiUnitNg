@@ -72,6 +72,10 @@ namespace GuiUnit
 			} catch {
 			}
 		}
+
+		public void SendMessage (TestMessage message)
+		{
+		}
 	}
 }
 

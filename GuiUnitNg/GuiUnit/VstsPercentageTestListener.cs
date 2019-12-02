@@ -37,5 +37,9 @@ namespace GuiUnit
 		public void TestStarted (ITest test)
 		{
 		}
+
+		public void SendMessage (TestMessage message)
+		{
+		}
 	}
 }
