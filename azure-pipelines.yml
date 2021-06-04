@@ -1,0 +1,109 @@
+# See available software and versions on hosted agents here: https://docs.microsoft.com/azure/devops/pipelines/agents/hosted
+variables:
+  NETCORE_VERSION: '5.0.x'
+  # RunPoliCheck: 'false'
+
+# resources:
+#   repositories:
+#     - repository: internal-templates
+#       type: github
+#       name: xamarin/yaml-templates
+#       endpoint: xamarin
+#       ref: refs/heads/main
+
+trigger:
+  branches:
+    include:
+    - main
+  tags:
+    include:
+    - '*'
+  paths:
+    exclude:
+    - README.md
+
+pr:
+  autoCancel: true
+  branches:
+    include:
+    - main
+  paths:
+    exclude:
+    - README.md
+
+# schedules:
+# - cron: "0 0 * * *"
+#   displayName: Daily midnight build
+#   branches:
+#     include:
+#     - develop
+
+jobs:      
+  - job: Build_GuiUnitNg
+    displayName: Build GuiUnitNg
+
+    pool:
+      vmImage: windows-2019
+
+    steps:
+      - task: UseDotNet@2
+        displayName: 'Install .NET SDK'
+        inputs:
+          version: $(NETCORE_VERSION)
+          includePreviewVersions: false
+
+      - task: MSBuild@1
+        displayName: Build GuiUnitNg.sln
+        inputs:
+          solution: GuiUnitNg.sln
+          configuration: Release
+          msbuildArguments: '/r /m /bl'
+
+      # - task: CopyFiles@2
+      #   inputs:
+      #     Contents: 'SignList.xml'
+      #     TargetFolder: '$(Build.ArtifactStagingDirectory)/nuget'
+
+      - task: CopyFiles@2
+        displayName: Copy nuget package to artifacts
+        inputs:
+          sourceFolder: '$(Build.SourcesDirectory)'
+          contents: '**/$(BuildConfiguration)/**/?(*.nupkg)'
+          targetFolder: '$(Build.ArtifactStagingDirectory)/nuget'
+
+#      - task: DotNetCoreCLI@2
+#        displayName: Publish to GitHub NuGet Packages
+#        condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/heads/main'))
+#        inputs:
+#          command: 'custom'
+#          custom: 'nuget'
+#          arguments: 'push --source https://nuget.pkg.github.com/xamarin/index.json --api-key $(GitHub.NuGet.Token) "$(Build.ArtifactStagingDirectory)\nuget\*.nupkg"'
+
+      # publish the packages
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Unsigned NuGets'
+        inputs:
+          artifactName: nuget
+          pathToPublish: '$(Build.ArtifactStagingDirectory)/nuget'
+
+      # make sure we are following the rules, but only on the main build
+  #     - ${{ if eq(variables['System.TeamProject'], 'devdiv') }}:
+  #     - task: ComponentGovernanceComponentDetection@0
+  #       condition: not(startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+  #       displayName: Component Detection - Log
+  #       inputs:
+  #         scanType: LogOnly
+  #     - task: ComponentGovernanceComponentDetection@0
+  #       condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
+  #       displayName: Component Detection - Report
+  #     - task: PoliCheck@1
+  #       condition: eq(variables['RunPoliCheck'], 'true')
+  #       displayName: 'PoliCheck'
+  #       inputs:
+  #         targetType: F
+
+  # - ${{ if eq(variables['System.TeamProject'], 'devdiv') }}:
+  #   - template: sign-artifacts/jobs/v2.yml@internal-templates
+  #     parameters:
+  #       dependsOn: [ build_windows ]
+  #       condition: and(succeeded(), or(eq(variables['Sign'], 'true'), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'],'refs/tags/')))) 
