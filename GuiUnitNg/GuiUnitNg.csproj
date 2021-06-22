@@ -8,6 +8,7 @@
     <PackageId>Xamarin.GuiUnitNg</PackageId>
     <PackageVersion>3.12.0</PackageVersion>
     <Authors>garuma</Authors>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageProjectUrl>https://github.com/garuma/GuiUnitNg</PackageProjectUrl>
     <Summary>This is a small project to compile both a runner and NUnit framework (both based on latest NUnit NuGet package) into a single .exe assembly that can be linked into a test project and used directly to run it.
 

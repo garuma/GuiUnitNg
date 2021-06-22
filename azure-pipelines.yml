@@ -1,0 +1,78 @@
+variables:
+  NETCORE_VERSION: '5.0.x'
+
+resources:
+  repositories:
+    - repository: xamarin-templates
+      type: github
+      name: xamarin/yaml-templates
+      endpoint: xamarin
+      ref: refs/heads/main
+
+trigger:
+  branches:
+    include:
+    - main
+  tags:
+    include:
+    - '*'
+
+pr:
+  autoCancel: true
+  branches:
+    include:
+    - main
+
+stages:
+  - stage: build
+    displayName: Build
+
+    jobs:
+        
+      - job: Build_GuiUnitNg
+        displayName: Build GuiUnitNg
+
+        pool:
+          vmImage: windows-2019
+
+        steps:
+          - task: UseDotNet@2
+            displayName: 'Install .NET SDK'
+            inputs:
+              version: $(NETCORE_VERSION)
+              includePreviewVersions: false
+
+          - task: MSBuild@1
+            displayName: Build GuiUnitNg.sln
+            inputs:
+              solution: GuiUnitNg.sln
+              configuration: Release
+              msbuildArguments: '/r /m /bl'
+
+          - task: CopyFiles@2
+            inputs:
+              contents: |
+                **/SignList.xml
+              targetFolder: '$(Build.ArtifactStagingDirectory)/nuget/unsigned'
+              flattenFolders: true
+
+          - task: CopyFiles@2
+            displayName: Copy out nuget
+            inputs:
+              sourceFolder: '$(Build.SourcesDirectory)/GuiUnitNg/bin/Release'
+              contents: '*.nupkg'
+              targetFolder: '$(Build.ArtifactStagingDirectory)/nuget/unsigned'
+              flattenFolders: true
+
+          - template: sign-artifacts/steps/v2.yml@xamarin-templates
+            parameters:
+              sourceFolder: '$(Build.ArtifactStagingDirectory)/nuget/unsigned'
+              targetFolder: $(Build.ArtifactStagingDirectory)/nuget/signed
+              condition: and(succeeded(), (variables['System.TeamProject'], 'devdiv'), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+
+          # publish the packages
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Unsigned NuGets'
+            inputs:
+              artifactName: nuget
+              pathToPublish: '$(Build.ArtifactStagingDirectory)/nuget'
