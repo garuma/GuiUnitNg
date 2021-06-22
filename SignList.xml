@@ -1,18 +1,15 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <ItemGroup>
-    <!-- <FirstParty Include="SkiaSharp*.dll" /> -->
-    <!-- <FirstParty Include="HarfBuzzSharp*.dll" /> -->
     <FirstParty Include="GuiUnit.exe" />
   </ItemGroup>
 
   <ItemGroup>
-    <!-- <ThirdParty Include="Newtonsoft.Json.dll" /> -->
+    <!-- <ThirdParty Include="x.y.dll" /> -->
   </ItemGroup>
 
   <ItemGroup>
-    <!-- <Skip Include="System.*.dll" /> -->
-    <!-- <Skip Include="*" /> -->
+    <!-- <Skip Include="x.y.dll" /> -->
   </ItemGroup>
 
 </Project>
