@@ -34,6 +34,8 @@ stages:
 
         pool:
           vmImage: windows-2019
+          ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+            vmImage: VSEng-MicroBuildVS2019
 
         steps:
           - task: UseDotNet@2
@@ -68,7 +70,7 @@ stages:
             parameters:
               sourceFolder: '$(Build.ArtifactStagingDirectory)/nuget/unsigned'
               targetFolder: $(Build.ArtifactStagingDirectory)/nuget/signed
-              condition: and(succeeded(), (variables['System.TeamProject'], 'devdiv'), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+              condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
 
           # publish the packages
           - task: PublishBuildArtifacts@1
